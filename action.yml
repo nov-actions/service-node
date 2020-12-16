@@ -1,6 +1,6 @@
 name: GitHub action for pipeline microservice in Node.js
 
-input:
+inputs:
   name:
     description: 'Name of microservice folder in monorepo'
     required: true
