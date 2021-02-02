@@ -7,6 +7,9 @@ inputs:
   git-private-key:
     description: 'Content of id_rsa file to access private packages'
     required: true
+  npmrc-content:
+    description: 'Content of .npmrc file to access private packages'
+    required: true
   docker-user:
     description: 'Username of docker account to create release'
     required: true
@@ -61,6 +64,7 @@ runs:
         ./build.ps1
       env:
         GIT_PRIVATE_KEY: ${{ inputs.git-private-key }}
+        NPMRC_CONTENT: ${{ inputs.npmrc-content }}
       shell: bash
 
     - name: Test the component
