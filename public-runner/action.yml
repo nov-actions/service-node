@@ -1,0 +1,110 @@
+name: GitHub action for pipeline microservice in Node.js
+
+inputs:
+  name:
+    description: 'Name of microservice folder in monorepo'
+    required: true
+  docker-user:
+    description: 'Username of docker account to create release'
+    required: true
+  docker-pass:
+    description: 'Password of docker account to create release'
+    required: true
+  npm-user:
+    description: 'Username of npm account to create release'
+    required: true
+  npm-pass:
+    description: 'Password of npm account to create release'
+    required: true
+  npm-email:
+    description: 'Email of npm account to create release'
+    required: true
+
+outputs:
+  build_number: 
+    description: "Build number"
+    value: ${{ steps.build_info.outputs.build_number }}
+  component_version: 
+    description: "Component version"
+    value: ${{ steps.build_info.outputs.component_version }}
+  component_name: 
+    description: "Component name"
+    value: ${{ steps.build_info.outputs.component_name }}
+
+runs:
+  using: "composite"
+  steps: 
+  
+    ############# Prepare #############
+
+    - name: Remove other components
+      run: |
+         ls | grep -v ${{ inputs.name }} | xargs -I{} rm -rf /{} 
+      shell: bash
+
+    - name: Save build number and component version
+      id: build_info
+      run: |
+        echo "##[set-output name=build_number;]$GITHUB_RUN_NUMBER"
+        echo "##[set-output name=component_version;]$(jq -r '.version' ${{ inputs.name }}/package.json)"
+        echo "##[set-output name=component_name;]$(jq -r '.name' ${{ inputs.name }}/component.json)"
+      shell: bash
+
+    ############# Build and test #############
+    
+    - name: Build the component
+      run: |
+        cd ${{ inputs.name }}
+        ./build.ps1
+      shell: bash
+
+    - name: Test the component
+      run: |
+        cd ${{ inputs.name }}
+        ./test.ps1
+      shell: bash
+
+    ############# Release #############
+
+    - name: Package runtime docker container
+      run: |
+        cd ${{ inputs.name }}
+        ./package.ps1
+      env:
+        DOCKER_IP: 172.17.0.1
+      shell: bash
+
+    - name: Publish runtime docker container
+      run: |
+        cd ${{ inputs.name }}
+        ./publish.ps1
+      env:
+        DOCKER_USER: ${{ inputs.docker-user }}
+        DOCKER_PASS: ${{ inputs.docker-pass }}
+      shell: bash
+
+    - name: Release binary artifacts
+      run: |
+        cd ${{ inputs.name }}
+        ./release.ps1
+      env:
+        NPM_USER: ${{ inputs.npm-user }}
+        NPM_PASS: ${{ inputs.npm-pass }}
+        NPM_EMAIL: ${{ inputs.npm-email }}
+      shell: bash
+
+    ############# Deploy #############
+
+    - name: Deploy component into the Stage environment
+      run: echo "Deploying to stage"
+      shell: bash
+
+    ############# Clear #############
+
+    # - name: Clean temporary build artifacts
+    #   if: ${{ always() }}
+    #   run: |
+    #    cd ${{ inputs.name }}
+    #    ./clean.ps1
+    #   shell: bash
+    
