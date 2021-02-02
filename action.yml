@@ -4,6 +4,21 @@ inputs:
   name:
     description: 'Name of microservice folder in monorepo'
     required: true
+  docker-user:
+    description: 'Username of docker account to create release'
+    required: true
+  docker-pass:
+    description: 'Password of docker account to create release'
+    required: true
+  npm-user:
+    description: 'Username of npm account to create release'
+    required: true
+  npm-pass:
+    description: 'Password of npm account to create release'
+    required: true
+  npm-email:
+    description: 'Email of npm account to create release'
+    required: true
 
 outputs:
   build_number: 
@@ -70,12 +85,19 @@ runs:
       run: |
         cd ${{ inputs.name }}
         ./publish.ps1
+      env:
+        DOCKER_USER: ${{ inputs.docker-user }}
+        DOCKER_PASS: ${{ inputs.docker-pass }}
       shell: bash
 
     - name: Release binary artifacts
       run: |
         cd ${{ inputs.name }}
         ./release.ps1
+      env:
+        NPM_USER: ${{ inputs.npm-user }}
+        NPM_PASS: ${{ inputs.npm-pass }}
+        NPM_EMAIL: ${{ inputs.npm-email }}
       shell: bash
 
     ############# Deploy #############
