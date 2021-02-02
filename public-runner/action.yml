@@ -4,6 +4,9 @@ inputs:
   name:
     description: 'Name of microservice folder in monorepo'
     required: true
+  git-private-key:
+    description: 'Content of id_rsa file to access private packages'
+    required: true
   docker-user:
     description: 'Username of docker account to create release'
     required: true
@@ -56,6 +59,8 @@ runs:
       run: |
         cd ${{ inputs.name }}
         ./build.ps1
+      env:
+        GIT_PRIVATE_KEY: ${{ inputs.git-private-key }}
       shell: bash
 
     - name: Test the component

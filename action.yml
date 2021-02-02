@@ -6,19 +6,19 @@ inputs:
     required: true
   docker-user:
     description: 'Username of docker account to create release'
-    required: true
+    required: false
   docker-pass:
     description: 'Password of docker account to create release'
-    required: true
+    required: false
   npm-user:
     description: 'Username of npm account to create release'
-    required: true
+    required: false
   npm-pass:
     description: 'Password of npm account to create release'
-    required: true
+    required: false
   npm-email:
     description: 'Email of npm account to create release'
-    required: true
+    required: false
 
 outputs:
   build_number: 
